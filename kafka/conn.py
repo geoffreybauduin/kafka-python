@@ -516,7 +516,7 @@ class BrokerConnection(object):
             ifr.future.failure(error)
         self.config['state_change_callback'](self)
 
-    def send(self, request, expect_response=True):
+    def send(self, request, expect_response=True, try_connect=False):
         """send request, return Future()
 
         Can block on network if request is larger than send_buffer_bytes
@@ -525,6 +525,10 @@ class BrokerConnection(object):
         if self.connecting():
             return future.failure(Errors.NodeNotReadyError(str(self)))
         elif not self.connected():
+            if try_connect:
+                self.connect()
+                return self.send(request=request, expect_response=expect_response,
+                                 try_connect=False)
             return future.failure(Errors.ConnectionError(str(self)))
         elif not self.can_send_more():
             return future.failure(Errors.TooManyInFlightRequests(str(self)))

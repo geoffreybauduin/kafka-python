@@ -451,7 +451,7 @@ class KafkaClient(object):
         if isinstance(request, tuple(ProduceRequest)) and request.required_acks == 0:
             expect_response = False
 
-        return self._conns[node_id].send(request, expect_response=expect_response)
+        return self._conns[node_id].send(request, expect_response=expect_response, try_connect=True)
 
     def poll(self, timeout_ms=None, future=None, sleep=True, delayed_tasks=True):
         """Try to read and write to sockets.
